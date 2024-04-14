@@ -8,7 +8,7 @@ To use this program, first clone the project using
 
 `git clone git@github.com:jkbkaiser/convert_transcriptions.git`
 
-or download and extract the raw files (the button for doing this can be found after clicking on the `code`). Next, place all files that need be
+or download and extract the raw files (this can be done by clicking on the `code` button or using [this](https://codeload.github.com/jkbkaiser/convert_transcriptions/zip/refs/heads/main) url). Next, place all files that need be
 processed in the `sources` directory/folder. From the root of the project run
 the command
 
