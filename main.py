@@ -47,7 +47,7 @@ class Reader:
 
 def parse_line(line: str) -> dict[str, str]:
     m = re.search(
-        rf"^\*(?P<{SPEAKER_COL}>.+):\s*(?:(?P<{LANGUAGE_COL}>\[.+\]))*(?P<{SENTENCE_COL}>.*)$",
+        rf"^\*(?P<{SPEAKER_COL}>.+):\s*(?:\[-\s[a-zA-Z]+])*(?P<{SENTENCE_COL}>.*)$",
         line,
     )
     if m is None:
@@ -55,9 +55,9 @@ def parse_line(line: str) -> dict[str, str]:
     return m.groupdict()
 
 
-def contains_switch(line: str) -> bool:
-    m = re.search(r"(int@x|@s)", line)
-    return m is not None
+def number_of_switches(line: str) -> int:
+    m = re.findall(r"(int@x|@s)", line)
+    return len(m)
 
 
 def is_segment_header(line: str) -> bool:
@@ -78,7 +78,7 @@ def get_subject_id(filename: str) -> int:
 def get_segment_number(line: str) -> int:
     m = re.search(r"^@T:\s*(\d+).*$", line)
     if m is None:
-        raise Exception("Syntax error: Could not parse segment number")
+        raise Exception("Syntax error: Could not parse segment number: {}", line)
     return int(m.groups()[0])
 
 
@@ -88,7 +88,9 @@ def parse_segments(subject_id: int, reader: Reader) -> list[dict[str, Union[str,
     while next(reader):
         curr_line = reader.get_line()
         if not is_segment_header(curr_line):
-            raise Exception("Syntax error: Could not parse segment header")
+            raise Exception(
+                f"Syntax error: Could not parse segment header: {curr_line}"
+            )
         segment_number = get_segment_number(curr_line)
 
         while (
@@ -97,14 +99,18 @@ def parse_segments(subject_id: int, reader: Reader) -> list[dict[str, Union[str,
             and not is_segment_header(reader.peek_line())
         ):
             curr_line = reader.get_line()
+            num_switches = number_of_switches(curr_line)
 
-            if contains_switch(curr_line):
+            if num_switches > 0:
                 parsed_line = parse_line(curr_line)
                 row = cast(dict[str, Union[str, int]], parsed_line)
                 row[SUBJECT_ID_COL] = subject_id
                 row[SEGMENT_ID_COL] = segment_number
                 row[ROW_NUMBER_COL] = reader.get_line_number()
-                rows.append(row)
+                row[SWITCH_COUNT] = num_switches
+
+                for _ in range(num_switches):
+                    rows.append(row)
 
     return rows
 
@@ -158,7 +164,7 @@ def run(args: Namespace):
     rows = []
 
     for filepath in source_path.iterdir():
-        if filepath.name == ".gitignore":
+        if not filepath.name.endswith(".cha"):
             continue
 
         print(f"Processing: {filepath}")

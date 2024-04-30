@@ -97,11 +97,13 @@ ROW_NUMBER_COL = "row_number"
 SPEAKER_COL = "speaker"
 LANGUAGE_COL = "lang"
 SENTENCE_COL = "sentence"
+SWITCH_COUNT = "switch_number"
+
 TABLE_COLS = [
     SUBJECT_ID_COL,
     SEGMENT_ID_COL,
     ROW_NUMBER_COL,
     SPEAKER_COL,
-    LANGUAGE_COL,
     SENTENCE_COL,
+    SWITCH_COUNT,
 ]
