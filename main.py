@@ -12,9 +12,9 @@ from constants import *
 class Reader:
     def __init__(self, file: TextIOWrapper):
         self.file = file
-        self.curr_line_number = 0
         self.curr_line = file.readline().strip()
         self.next_line = file.readline().strip()
+        self.curr_line_number = 1
 
     def __next__(self) -> bool:
         self.curr_line = self.next_line
@@ -94,9 +94,9 @@ def parse_segments(subject_id: int, reader: Reader) -> list[dict[str, Union[str,
         segment_number = get_segment_number(curr_line)
 
         while (
-            next(reader)
+            not is_segment_header(reader.peek_line())
+            and next(reader)
             and not is_end(reader.get_line())
-            and not is_segment_header(reader.peek_line())
         ):
             curr_line = reader.get_line()
             num_switches = number_of_switches(curr_line)
