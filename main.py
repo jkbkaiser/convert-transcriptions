@@ -15,22 +15,25 @@ class Reader:
         self.curr_line = file.readline().strip()
         self.next_line = file.readline().strip()
         self.curr_line_number = 1
+        self.next_line_number = 2
 
     def __next__(self) -> bool:
         self.curr_line = self.next_line
+        self.curr_line_number = self.next_line_number
+
         # Skip lines that start with whitespace
         # In the future this might need to be done better
         if not self.file.readable():
             return False
 
         new_line = self.file.readline()
-        self.curr_line_number += 1
+        self.next_line_number += 1
         while not new_line or new_line[0].isspace() or new_line[0] == "%":
             if not new_line or not self.file.readable():
                 return False
 
             new_line = self.file.readline()
-            self.curr_line_number += 1
+            self.next_line_number += 1
 
         self.next_line = new_line.strip()
         return True
