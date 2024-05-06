@@ -50,7 +50,7 @@ class Reader:
 
 def parse_line(line: str) -> dict[str, str]:
     m = re.search(
-        rf"^\*(?P<{SPEAKER_COL}>.+):\s*(?:\[-\s[a-zA-Z]+])*(?P<{SENTENCE_COL}>.*)$",
+        rf"^\*(?P<{SPEAKER_COL}>.+):\s*(?:\[-\s[a-zA-Z]+])*\s*(?P<{SENTENCE_COL}>.*)\s*$",
         line,
     )
     if m is None:
