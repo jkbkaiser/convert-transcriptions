@@ -130,25 +130,39 @@ def is_header(line: str, headers: list[str]) -> bool:
     return False
 
 
-def skip_headers(reader: Reader, headers: list[str]):
+def skip_headers(reader: Reader, headers: list[str]) ->  int:
+    if is_header(reader.get_line(), headers):
+        count = 1
+    else:
+        count = 0
+
     while is_header(reader.peek_line(), headers):
         next(reader)
+        count += 1
+
+    return count
 
 
-def skip_all_headers(reader: Reader):
-    skip_headers(reader, HIDDEN_HEADERS)
+def skip_all_headers(reader: Reader) -> int:
+    """ Skips headers and returns the number of hidden headers"""
+    number_of_hidden_headers = skip_headers(reader, HIDDEN_HEADERS)
     skip_headers(reader, INITIAL_HEADERS)
     skip_headers(reader, PARTICIPANT_SPECIFIC_HEADERS)
     skip_headers(reader, CONSTANT_HEADERS)
     skip_headers(reader, CHANGABLE_HEADERS)
+
+    return number_of_hidden_headers
 
 
 def process_file(filepath: Path) -> list[dict[str, Union[str, int]]]:
     with filepath.open("r") as f:
         reader = Reader(f)
         subject_id = get_subject_id(filepath.name)
-        skip_all_headers(reader)
+        number_of_hidden_headers = skip_all_headers(reader)
         segments = parse_segments(subject_id, reader)
+
+    for segment in segments:
+        segment[ROW_NUMBER_COL] = segment[ROW_NUMBER_COL] - number_of_hidden_headers
 
     return segments
 
