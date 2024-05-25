@@ -85,7 +85,7 @@ def get_segment_number(line: str) -> int:
     return int(m.groups()[0])
 
 
-def parse_segments(subject_id: int, reader: Reader) -> list[dict[str, Union[str, int]]]:
+def parse_segments(subject_id: int, reader: Reader, number_of_hidden_headers: int) -> list[dict[str, Union[str, int]]]:
     rows = []
 
     while next(reader):
@@ -109,7 +109,7 @@ def parse_segments(subject_id: int, reader: Reader) -> list[dict[str, Union[str,
                 row = cast(dict[str, Union[str, int]], parsed_line)
                 row[SUBJECT_ID_COL] = subject_id
                 row[SEGMENT_ID_COL] = segment_number
-                row[ROW_NUMBER_COL] = reader.get_line_number()
+                row[ROW_NUMBER_COL] = reader.get_line_number() - number_of_hidden_headers
                 row[SWITCH_COUNT] = num_switches
 
                 for _ in range(num_switches):
@@ -159,10 +159,14 @@ def process_file(filepath: Path) -> list[dict[str, Union[str, int]]]:
         reader = Reader(f)
         subject_id = get_subject_id(filepath.name)
         number_of_hidden_headers = skip_all_headers(reader)
-        segments = parse_segments(subject_id, reader)
+        segments = parse_segments(subject_id, reader, number_of_hidden_headers)
 
-    for segment in segments:
-        segment[ROW_NUMBER_COL] = segment[ROW_NUMBER_COL] - number_of_hidden_headers
+    # for segment in segments:
+    #     print("T")
+    #     print(segment)
+        # print(segment[SENTENCE_COL], segment[ROW_NUMBER_COL])
+        # segment[ROW_NUMBER_COL] = segment[ROW_NUMBER_COL] - number_of_hidden_headers
+        # print(segment[SENTENCE_COL], segment[ROW_NUMBER_COL])
 
     return segments
 
