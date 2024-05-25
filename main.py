@@ -82,6 +82,7 @@ def get_segment_number(line: str) -> int:
     m = re.search(r"^@T:\s*(\d+).*$", line)
     if m is None:
         raise Exception("Syntax error: Could not parse segment number: {}", line)
+
     return int(m.groups()[0])
 
 
@@ -160,13 +161,6 @@ def process_file(filepath: Path) -> list[dict[str, Union[str, int]]]:
         subject_id = get_subject_id(filepath.name)
         number_of_hidden_headers = skip_all_headers(reader)
         segments = parse_segments(subject_id, reader, number_of_hidden_headers)
-
-    # for segment in segments:
-    #     print("T")
-    #     print(segment)
-        # print(segment[SENTENCE_COL], segment[ROW_NUMBER_COL])
-        # segment[ROW_NUMBER_COL] = segment[ROW_NUMBER_COL] - number_of_hidden_headers
-        # print(segment[SENTENCE_COL], segment[ROW_NUMBER_COL])
 
     return segments
 
